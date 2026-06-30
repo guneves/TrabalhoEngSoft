@@ -38,4 +38,29 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
+app.post('/auth/password/forgot', async (req, res) => {
+    try {
+        const result = await authService.requestPasswordReset(req.body.email);
+        res.status(200).json(result);
+    } catch (err) {
+        if (err.status) return res.status(err.status).json({ error: err.message });
+        console.error('[Auth Service] Erro ao solicitar recuperacao de senha:', err.message);
+        res.status(500).json({ error: 'Erro interno ao solicitar recuperacao de senha.' });
+    }
+});
+
+app.post('/auth/password/reset', async (req, res) => {
+    const { token, novaSenha, senha, password } = req.body;
+    const senhaFinal = novaSenha || senha || password;
+
+    try {
+        const result = await authService.resetPassword(token, senhaFinal);
+        res.status(200).json(result);
+    } catch (err) {
+        if (err.status) return res.status(err.status).json({ error: err.message });
+        console.error('[Auth Service] Erro ao redefinir senha:', err.message);
+        res.status(500).json({ error: 'Erro interno ao redefinir senha.' });
+    }
+});
+
 app.listen(3001, () => console.log('=> Auth Service ativo na porta 3001'));

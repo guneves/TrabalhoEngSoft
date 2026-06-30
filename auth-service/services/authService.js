@@ -1,7 +1,12 @@
 // [SOLID: SRP] — regra de negócio de autenticação isolada da camada HTTP
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../repositories/userRepository');
+
+function hashToken(token) {
+    return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 async function register(userData) {
     const nome_completo = userData.nome_completo || userData.name;
@@ -76,4 +81,60 @@ async function login(email, senha) {
     return { token, user: { nome_completo: user.nome_completo, email: user.email, tipo: user.tipo } };
 }
 
-module.exports = { register, login };
+async function requestPasswordReset(email) {
+    if (!email) {
+        const err = new Error('Email e obrigatorio.');
+        err.status = 400;
+        throw err;
+    }
+
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+        return {
+            message: 'Se o email estiver cadastrado, um link de recuperacao sera enviado.',
+        };
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = hashToken(token);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    await userRepository.createPasswordResetToken(user.id, tokenHash, expiresAt);
+
+    console.log(`[Auth Service] Email simulado para ${email}: token de recuperacao ${token}`);
+
+    return {
+        message: 'Se o email estiver cadastrado, um link de recuperacao sera enviado.',
+        resetToken: token,
+        expiresAt,
+    };
+}
+
+async function resetPassword(token, novaSenha) {
+    if (!token || !novaSenha) {
+        const err = new Error('Token e novaSenha sao obrigatorios.');
+        err.status = 400;
+        throw err;
+    }
+
+    if (novaSenha.length < 6) {
+        const err = new Error('A nova senha deve ter pelo menos 6 caracteres.');
+        err.status = 400;
+        throw err;
+    }
+
+    const tokenHash = hashToken(token);
+    const resetToken = await userRepository.findValidPasswordResetToken(tokenHash);
+    if (!resetToken) {
+        const err = new Error('Token invalido ou expirado.');
+        err.status = 400;
+        throw err;
+    }
+
+    const senha_hash = await bcrypt.hash(novaSenha, 10);
+    await userRepository.updatePassword(resetToken.user_id, senha_hash);
+    await userRepository.markPasswordResetTokenUsed(resetToken.id);
+
+    return { message: 'Senha redefinida com sucesso.' };
+}
+
+module.exports = { register, login, requestPasswordReset, resetPassword };

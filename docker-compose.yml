@@ -12,6 +12,7 @@ services:
     depends_on:
       - auth-service
       - payment-service
+      - evidence-service
 
   # Microsserviço de Autenticação
   auth-service:
@@ -44,6 +45,20 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+
+  # Microsservico de Evidencias/Provas Digitais
+  evidence-service:
+    build: ./evidence-service
+    environment:
+      - DATABASE_URL=postgres://user:password@db_evidence:5432/evidence_db
+      - DB_HOST=db_evidence
+      - DB_PORT=5432
+      - DB_NAME=evidence_db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - JWT_SECRET=super_secret_key_faculdade
+    depends_on:
+      - db_evidence
 
   # Message Broker
   rabbitmq:
@@ -94,7 +109,20 @@ services:
     volumes:
       - payment_data:/var/lib/postgresql/data # <-- MAPEAMENTO DO VOLUME AQUI
 
+  # Banco de Dados de Evidencias/Provas Digitais
+  db_evidence:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: evidence_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - evidence_data:/var/lib/postgresql/data
+
 # DECLARAÇÃO GLOBAL DOS VOLUMES (No final do arquivo)
 volumes:
   auth_data:
   payment_data:
+  evidence_data:

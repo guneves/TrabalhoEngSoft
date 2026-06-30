@@ -44,7 +44,7 @@
 
 ---
 
-## REGRAS GLOBAIS PARA A IA (ler antes de cada fase)
+## REGRAS GLOBAIS DE IMPLEMENTAÇÃO (ler antes de cada fase)
 
 ```
 1. Leia TODOS os arquivos do repositório antes de escrever qualquer código.
@@ -70,7 +70,7 @@
 
 **ADRs:** ADR-0005 (JWT stateless), ADR-0006 Desvio 1 e Desvio 2
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: frontend/login.html, auth-service/server.js, docker-compose.yml
 Problema 1 (Desvio 1): login.html possui um bloco catch que autentica o usuário 
@@ -104,7 +104,7 @@ O banco existe mas não está sendo usado.
 
 **ADRs:** ADR-0005 (JWT stateless), ADR-0006 Desvio 3 parcial
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: payment-service/server.js, auth-service/server.js (para entender o formato do JWT emitido)
 Problema: payment-service não valida nenhum Authorization header.
@@ -138,7 +138,7 @@ O auth-service já emite JWT com JWT_SECRET via process.env.JWT_SECRET.
 
 **ADRs:** ADR-0001 (microsserviço auth), ADR-0005 (JWT)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: auth-service/server.js, auth-service/db.js (criado na Fase 1.1), 
 frontend/cadastro.html, docker-compose.yml
@@ -167,7 +167,7 @@ Decisão D1: na v1, apenas advogados e usuários comuns são cadastrados.
 
 **ADRs:** ADR-0005 (JWT stateless), ADR-0002 (REST síncrono)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: auth-service/server.js, auth-service/services/authService.js (criado na Fase 2.1),
 frontend/login.html
@@ -199,7 +199,7 @@ Logout é client-side: remover token do localStorage e redirecionar.
 
 **ADRs:** ADR-0001 (microsserviço separado), ADR-0002 (REST síncrono)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: TODOS os arquivos de payment-service/, frontend/checkout.html, docker-compose.yml
 Decisão D2 (documento de requisitos): pacotes básico, médio e premium na v1.
@@ -237,7 +237,7 @@ Se necessário, documentar essa decisão como adendo à ADR-0006.
 
 **ADRs:** ADR-0002 (REST síncrono para operações transacionais), ADR-0004 (circuit breaker com opossum)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: payment-service/services/paymentService.js, payment-service/server.js
 Estado atual após Fase 3.1: checkout retorna pixCode como string simulada.
@@ -269,7 +269,7 @@ Esta fase formaliza o gerador de PIX e adiciona o circuit breaker (ADR-0004).
 
 **ADRs:** ADR-0001 (broker assíncrono), ADR-0002 (fila para background), ADR-0003 (RabbitMQ + DLX)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: TODOS os arquivos do repositório. Especialmente payment-service/services/paymentService.js
 e docker-compose.yml.
@@ -299,7 +299,7 @@ DLX: mensagens que falharem 3x vão para a fila 'payment.confirmed.dlq'.
 
 **ADRs:** ADR-0001 (modularidade, API Gateway), ADR-0006 Desvio 3
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: docker-compose.yml, frontend/login.html, frontend/cadastro.html, 
 frontend/checkout.html e qualquer outro arquivo HTML/JS que contenha localhost:300X.
@@ -327,7 +327,7 @@ http://localhost:80. Internamente, nginx roteia para os serviços.
 
 **ADRs:** Todas (documentação transversal)
 
-**Contexto para a IA:**
+**Contexto de implementação:**
 ```
 Leia: TODOS os arquivos do repositório no estado final.
 Objetivo: gerar dois documentos e atualizar o README.
@@ -409,5 +409,5 @@ Sprint 3 → Fase 3.1 → Fase 3.2
 Sprint 4 → Fase 4.1 → Fase 4.2 → Fase 4.3
 ```
 
-> Cada fase é independente e pode ser passada para a IA com um contexto limpo.  
-> Sempre instrua a IA: **"Leia todos os arquivos do repositório antes de escrever qualquer código."**
+> Cada fase é independente e deve ser executada com contexto limpo.  
+> Antes de escrever qualquer código, leia todos os arquivos relevantes do repositório.
