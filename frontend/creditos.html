@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veridit - Compre Créditos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --purple: #8b2fc9; --purple-hover: #7221a8; --text-dark: #0f172a; --text-muted: #475569; --border: #e2e8f0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #ffffff; color: var(--text-dark); }
+        header { width: 100%; padding: 20px 60px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .logo { font-size: 24px; font-weight: 700; color: #1e1b4b; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .logo-icon { background: var(--purple); width: 24px; height: 18px; border-radius: 4px; display: inline-block; }
+        nav a { margin: 0 12px; font-size: 14px; color: var(--text-muted); text-decoration: none; font-weight: 500; }
+        .btn-header { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: white; }
+        .user-profile-box { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+        .avatar { width: 32px; height: 32px; background: #e9d5ff; color: var(--purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-weight: 700; }
+        .btn-logout { background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer; text-decoration: underline; margin-left: 6px; }
+        .main-content { max-width: 1100px; margin: 60px auto; padding: 0 20px; text-align: center; }
+        h1 { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
+        .cards-grid { display: flex; gap: 24px; justify-content: center; margin-top: 40px; }
+        .pricing-card { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; width: 280px; display: flex; flex-direction: column; align-items: center; }
+        .pricing-card.featured { border: 2px solid var(--purple); box-shadow: 0 10px 15px -3px rgba(139, 47, 201, 0.1); }
+        .card-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+        .price { font-size: 36px; font-weight: 700; margin-bottom: 24px; }
+        .features-list { list-style: none; width: 100%; text-align: left; margin-bottom: 32px; font-size: 14px; color: var(--text-muted); }
+        .features-list li { margin-bottom: 10px; }
+        .card-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; background: var(--purple); color: white; }
+        .card-btn:hover { background: var(--purple-hover); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="window.location.href='creditos.html'"><span class="logo-icon"></span> Veridit</div>
+        <nav><a href="#">Produtos</a><a href="#">Soluções</a><a href="#">Preços</a></nav>
+        <div id="header-auth-area">
+            <button class="btn-header" onclick="window.location.href='login.html'">Logar</button>
+        </div>
+    </header>
+    <div class="main-content">
+        <h1>Compre créditos</h1>
+        <div class="cards-grid">
+            <div class="pricing-card">
+                <div class="card-title">Bronze</div>
+                <div class="price">R$ 14,99</div>
+                <ul class="features-list"><li>• 10 Créditos</li><li>• Suporte Padrão</li></ul>
+                <button class="card-btn" onclick="irParaCheckout(1, 'Pacote Bronze', 14.99)">Selecionar</button>
+            </div>
+            <div class="pricing-card featured">
+                <div class="card-title">Prata</div>
+                <div class="price">R$ 34,99</div>
+                <ul class="features-list"><li>• 50 Créditos</li><li>• Suporte Prioritário</li></ul>
+                <button class="card-btn" onclick="irParaCheckout(2, 'Pacote Prata', 34.99)">Selecionar</button>
+            </div>
+            <div class="pricing-card">
+                <div class="card-title">Diamante</div>
+                <div class="price">R$ 54,99</div>
+                <ul class="features-list"><li>• Créditos Ilimitados</li><li>• API Dedicada</li></ul>
+                <button class="card-btn" onclick="irParaCheckout(3, 'Pacote Diamante', 54.99)">Selecionar</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function verificarSessao() {
+            const token = localStorage.getItem('veridit_token');
+            const name = localStorage.getItem('userName');
+            if (token && name) {
+                document.getElementById('header-auth-area').innerHTML = `
+                    <div class="user-profile-box">
+                        <div class="avatar">${name[0]}</div>
+                        <span>Olá, ${name}</span>
+                        <button class="btn-logout" onclick="logout()">Sair</button>
+                    </div>`;
+            }
+        }
+        function logout() { localStorage.removeItem('veridit_token'); window.location.href = 'login.html'; }
+        
+        function irParaCheckout(id, nome, preco) {
+            localStorage.setItem('checkout_package_id', id);
+            localStorage.setItem('checkout_package_name', nome);
+            localStorage.setItem('checkout_package_price', preco.toString()); 
+            window.location.href = 'checkout.html';
+        }
+        verificarSessao();
+    </script>
+</body>
+</html>
