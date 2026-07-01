@@ -221,7 +221,15 @@
 | ADR-0003 | Message broker: RabbitMQ | ✅ Documentada |
 | ADR-0004 | Resiliência: retry, DLQ e circuit breaker | ✅ Documentada |
 | ADR-0005 | Autenticação: JWT stateless por serviço | ✅ Documentada |
-| ADR-0006 | Desvios arquiteturais documentados | ✅ Documentada |
+| ADR-0006 | Desvios conscientes e escopo final | ✅ Documentada |
+| ADR-0007 | Persistência PostgreSQL isolada por serviço | ✅ Documentada |
+| ADR-0008 | Domínio de autenticação e ciclo de sessão | ✅ Documentada |
+| ADR-0009 | Domínio de pagamentos, catálogo e PIX simulado | ✅ Documentada |
+| ADR-0010 | Notificação de pagamento por evento | ✅ Documentada |
+| ADR-0011 | Domínio de evidências e ZIP final | ✅ Documentada |
+| ADR-0012 | API Gateway nginx e frontend estático | ✅ Documentada |
+| ADR-0013 | Containerização, entrypoints e execução local | ✅ Documentada |
+| ADR-0014 | Estratégia de validação funcional dos requisitos | ✅ Documentada |
 
 > Ver `docs/ADRs/` para os arquivos completos.
 

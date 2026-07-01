@@ -2,7 +2,7 @@
 
 > Projeto: Veridit — Plataforma de Captura de Provas Digitais  
 > Disciplina: Engenharia de Software I — Prof. Dr. Eduardo Almeida  
-> Meta original: 30% dos requisitos funcionando com arquitetura de microsserviços aderente às ADRs
+> Meta da entrega final: pelo menos 70% dos requisitos funcionando com arquitetura de microsserviços aderente às ADRs
 > Resultado atual: **73,3%** (11 de 15 requisitos entregues)
 > Atualizado em: 2026-06-30
 

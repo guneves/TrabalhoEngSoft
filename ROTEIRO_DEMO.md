@@ -377,14 +377,14 @@ curl -L -H "Authorization: Bearer $TOKEN" \
 Mostrar:
 
 - `README.md` com instruções de execução
-- Pasta `docs/ADRs/` com os 6 arquivos
+- Pasta `docs/ADRs/` com as 14 ADRs e o índice
 - `docs/SOLID_AUDIT.md`
 - `docs/REQUIREMENTS_SPRINT1.md`
 
 **:**
 
 > "Toda a documentação está na pasta docs.
-> As 6 ADRs reescrevem as decisões do Grupo 2 com opções reais comparáveis.
+> As 14 ADRs documentam as decisões arquiteturais e de implementação dos requisitos entregues.
 > O SOLID_AUDIT rastreia cada princípio aplicado até o arquivo e a função."
 
 ---

@@ -109,7 +109,7 @@ Validacao executada em Docker Compose no dia 2026-06-30:
 
 ## Documentação
 
-- `docs/ADRs/` — Architecture Decision Records (6 ADRs)
+- `docs/ADRs/` — Architecture Decision Records (14 ADRs + índice)
 - `docs/SOLID_AUDIT.md` — Auditoria dos princípios SOLID aplicados no código
 - `docs/REQUIREMENTS_SPRINT1.md` — Tabela dos requisitos entregues com endpoints
 - `docs/SPRINT-RESULT.md` — Resultado detalhado de cada fase de implementação

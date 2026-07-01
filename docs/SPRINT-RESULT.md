@@ -7,11 +7,11 @@
 
 ---
 
-## Sprint 1 — Quitação da Dívida Técnica (ADR-0006)
+## Sprint 1 — Quitação da Dívida Técnica Inicial
 
-> Objetivo: corrigir os desvios documentados na ADR-0006 antes de construir features novas. Nenhum requisito novo foi entregue nesta sprint.
+> Objetivo: corrigir problemas iniciais de segurança, persistência e autenticação antes de construir features novas. Nenhum requisito novo foi entregue nesta sprint.
 
-### Fase 1.1 — Remover mock-token e conectar auth-service ao PostgreSQL
+### Fase 1.1 — Remover fallback inseguro e conectar auth-service ao PostgreSQL
 
 **Status:** ✅ Concluída
 
@@ -20,14 +20,14 @@
 - `auth-service/migrations/001_create_users.sql` — tabela `users` com campos de usuário e tabela `password_reset_tokens`.
 
 **Arquivos editados:**
-- `frontend/login.html` — mock-token removido.
+- `frontend/login.html` — fallback inseguro removido.
 - `auth-service/server.js` — persistência em memória substituída por PostgreSQL.
 - `auth-service/package.json` — dependências `pg`, `bcrypt` e `jsonwebtoken`.
 - `docker-compose.yml` — variáveis de banco e `JWT_SECRET` injetadas no serviço.
 
-**ADRs aplicadas:** ADR-0005, ADR-0006 Desvio 1, ADR-0006 Desvio 2
+**ADRs aplicadas:** ADR-0005, ADR-0007, ADR-0008
 
-**Resultado:** autenticação deixou de depender de fallback inseguro e passou a persistir usuários em banco.
+**Resultado:** autenticação passou a falhar de forma explícita quando o backend está indisponível e passou a persistir usuários em banco.
 
 ### Fase 1.2 — Adicionar validação JWT no payment-service
 
@@ -41,7 +41,7 @@
 - `payment-service/package.json` — dependência `jsonwebtoken`.
 - `docker-compose.yml` — mesmo `JWT_SECRET` injetado no `payment-service`.
 
-**ADRs aplicadas:** ADR-0005, ADR-0006 Desvio 3
+**ADRs aplicadas:** ADR-0005, ADR-0012
 
 **Resultado:** rotas protegidas de pagamento deixaram de aceitar clientes não autenticados.
 

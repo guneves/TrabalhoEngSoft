@@ -17,4 +17,4 @@ Chosen option: "opossum + DLQ nativa do RabbitMQ", because `opossum` é a biblio
 ### Consequences
 
 * Good, because opossum encapsula qualquer chamada síncrona (banco de dados, serviço externo) em poucos parâmetros configuráveis, e o circuit breaker impede que falhas em cascata derrubem todo o sistema
-* Bad, because o circuit breaker só é relevante quando há dependências externas reais para proteger; no estado atual, onde o payment-service não chama nenhum serviço externo de fato, opossum envolve uma lógica simulada — demonstra o padrão sem provar seu valor real
+* Bad, because o circuit breaker protege principalmente chamadas a dependências como banco e provedores externos; no estado atual, ele demonstra a tática no checkout, mas ainda não cobre integração bancária real
