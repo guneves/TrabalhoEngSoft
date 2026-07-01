@@ -2,9 +2,10 @@
 
 ---
 
-> **Status: ✅ Concluído**  
-> Sprint encerrada em: 2026-06-07  
-> Requisitos entregues: REQ01, REQ03, REQ04, REQ05, REQ06, REQ07 (40% — acima da meta de 30%)  
+> **Status: ✅ Concluído e expandido**
+> Sprint base encerrada em: 2026-06-07
+> Expansão documentada em: 2026-06-30
+> Requisitos entregues: REQ01, REQ02, REQ03, REQ04, REQ05, REQ06, REQ07, REQ08, REQ09, REQ10, REQ15 (73,3%)
 > Resultado: Ver `docs/SPRINT-RESULT.md`
 
 ---
@@ -12,22 +13,27 @@
 > Disciplina: Engenharia de Software I — Prof. Dr. Eduardo Almeida  
 > Trabalho III | Meta: 30% dos requisitos funcionando + arquitetura de microsserviços aderente às ADRs  
 > Stack confirmada: Node.js + Express | PostgreSQL | RabbitMQ | Docker Compose  
-> Repositório: estrutura de pastas por serviço (`auth-service/`, `payment-service/`, `frontend/`)
+> Repositório: estrutura de pastas por serviço (`auth-service/`, `payment-service/`, `evidence-service/`, `notification-service/`, `frontend/`)
 
 ---
 
-## Mapa de Requisitos-Alvo (30% = 5 de 15)
+## Mapa de Requisitos-Alvo Atual (73,3% = 11 de 15)
 
 | Req | Descrição | Serviço Responsável | Sprint |
 |-----|-----------|---------------------|--------|
 | REQ01 | Cadastrar Usuário (advogado e comum) | `auth-service` | 2 |
+| REQ02 | Recuperar senha | `auth-service` | 5 |
 | REQ03 | Logar no Sistema | `auth-service` | 2 |
 | REQ04 | Sair do Sistema | `auth-service` + frontend | 2 |
 | REQ05 | Comprar Créditos (selecionar pacote) | `payment-service` + `catalog-service` | 3 |
 | REQ06 | Efetuar Pagamento (PIX/QR Code) | `payment-service` | 3 |
 | REQ07 | Confirmar pagamento por email *(bônus — demonstra broker)* | `notification-service` via RabbitMQ | 4 |
+| REQ08 | Criar solicitação de captura/prova | `evidence-service` | 5 |
+| REQ09 | Listar solicitações de captura/prova | `evidence-service` | 5 |
+| REQ10 | Consultar detalhe de solicitação de captura/prova | `evidence-service` | 5 |
+| REQ15 | Baixar ZIP final simulado | `evidence-service` | 5 |
 
-> REQ02 (recuperar senha), REQ08–REQ15 (captura, relatórios, zip) ficam fora desta sprint. Não implementar.
+> REQ11–REQ14 permanecem fora do escopo atual por exigirem captura real de mídia, processamento avançado e relatório completo.
 
 ---
 
@@ -54,7 +60,7 @@
 5. SOLID deve ser aplicado e comentado inline com: // [SOLID: SRP] motivo
 6. Todo endpoint novo deve ter tratamento de erro explícito (try/catch + status HTTP correto).
 7. Nenhum segredo (senhas, JWT_SECRET) deve ser hardcoded — sempre via process.env.
-8. Após cada fase, o docker-compose up deve subir sem erros.
+8. Após cada fase, o `docker compose up` deve subir sem erros.
 ```
 
 ---
@@ -96,7 +102,7 @@ O banco existe mas não está sendo usado.
 - `db.js` = **SRP** (só gerencia conexão)
 - `server.js` chama `db.js` via import = **DIP** (depende de abstração, não de implementação direta)
 
-**Verificação:** `docker-compose up` → `POST /auth/register` cadastra usuário → usuário persiste após `docker-compose restart auth-service`.
+**Verificação:** `docker compose up` → `POST /auth/register` cadastra usuário → usuário persiste após `docker compose restart auth-service`.
 
 ---
 
@@ -319,7 +325,7 @@ http://localhost:80. Internamente, nginx roteia para os serviços.
 
 **Não fazer:** Não configurar SSL, rate limiting ou autenticação no gateway. nginx como proxy reverso simples é suficiente.
 
-**Verificação:** `docker-compose up` → tudo acessível em `http://localhost`. Nenhuma porta `300X` acessível diretamente do browser.
+**Verificação:** `docker compose up` → tudo acessível em `http://localhost`. Nenhuma porta `300X` acessível diretamente do browser.
 
 ---
 
@@ -340,19 +346,19 @@ Objetivo: gerar dois documentos e atualizar o README.
    - Exemplo: "SRP — `auth-service/repositories/userRepository.js` — só gerencia persistência de usuários, sem lógica de negócio"
    Usar os comentários `// [SOLID: SRP]` espalhados no código como fonte.
 
-2. Criar `docs/REQUIREMENTS_SPRINT1.md` — tabela com REQ01, REQ03, REQ04, REQ05, REQ06, REQ07: descrição, status (✅ implementado), serviço responsável, endpoint ou mecanismo que o atende.
+2. Criar/atualizar `docs/REQUIREMENTS_SPRINT1.md` — tabela com REQ01, REQ02, REQ03, REQ04, REQ05, REQ06, REQ07, REQ08, REQ09, REQ10 e REQ15: descrição, status (✅ implementado), serviço responsável, endpoint ou mecanismo que o atende.
 
 3. Atualizar `README.md` com:
    ```
    ## Como rodar
-   docker-compose up --build
+   docker compose up --build -d
    
    ## Serviços disponíveis
    - Frontend + Gateway: http://localhost
    - RabbitMQ Management: http://localhost:15672 (guest/guest)
    
-   ## Requisitos implementados (Sprint 1 — 30%)
-   REQ01, REQ03, REQ04, REQ05, REQ06, REQ07
+   ## Requisitos implementados
+   REQ01, REQ02, REQ03, REQ04, REQ05, REQ06, REQ07, REQ08, REQ09, REQ10, REQ15
    
    ## ADRs
    Ver pasta ADRs/
@@ -361,26 +367,31 @@ Objetivo: gerar dois documentos e atualizar o README.
    Ver docs/SOLID_AUDIT.md
    ```
 
-**Verificação:** `docker-compose up --build` a partir de um clone limpo do repositório sobe todos os serviços sem erro. Fluxo completo: cadastro → login → selecionar pacote → checkout → mensagem no RabbitMQ → log de email.
+**Verificação:** `docker compose up --build -d` a partir de um clone limpo do repositório sobe todos os serviços sem erro. Fluxo completo: cadastro → login → selecionar pacote → checkout → mensagem no RabbitMQ → log de email.
 
 ---
 
 ## Checklist Final de Apresentação
 
 ```
-[ ] docker-compose up --build sobe sem erro em máquina limpa
+[ ] docker compose up --build -d sobe sem erro em máquina limpa
 [ ] REQ01: POST /api/auth/register com campos de advogado e usuário comum → 201
+[ ] REQ02: POST /api/auth/password/forgot gera token temporário; POST /api/auth/password/reset redefine senha
 [ ] REQ03: POST /api/auth/login com credenciais corretas → JWT retornado
 [ ] REQ04: Logout remove token do localStorage, redireciona para login
 [ ] REQ05: GET /api/payments/packages → 3 pacotes listados
 [ ] REQ06: POST /api/payments/checkout com JWT → pixCode retornado e salvo no banco
 [ ] REQ07: Mensagem visível no painel RabbitMQ (localhost:15672) após checkout
-[ ] Circuit breaker: derrubar db_payments → payment-service retorna 503 (não trava)
+[ ] REQ08: POST /api/evidence/requests com JWT → solicitação criada
+[ ] REQ09: GET /api/evidence/requests com JWT → solicitações do usuário listadas
+[ ] REQ10: GET /api/evidence/requests/:id com JWT → detalhe retornado
+[ ] REQ15: GET /api/evidence/requests/:id/download com JWT → ZIP baixado
+[ ] Circuit breaker: derrubar db_payment → payment-service retorna 503 (não trava)
 [ ] JWT: chamar /api/payments/checkout sem token → 401
 [ ] API Gateway: nenhum serviço acessível diretamente por porta (só via localhost:80)
 [ ] ADRs/: 6 arquivos presentes
 [ ] docs/SOLID_AUDIT.md: presente com exemplos reais do código
-[ ] docs/REQUIREMENTS_SPRINT1.md: tabela com os 6 requisitos e status
+[ ] docs/REQUIREMENTS_SPRINT1.md: tabela com os 11 requisitos entregues e status
 [ ] README.md: instruções de execução claras e completas
 ```
 
@@ -392,11 +403,13 @@ Objetivo: gerar dois documentos e atualizar o README.
 |---------|--------------|------------|---------------|
 | `nginx` (gateway) | 80 | **80** | — |
 | `auth-service` | 3001 | ~~exposta~~ | `db_auth` (PostgreSQL) |
-| `payment-service` | 3002 | ~~exposta~~ | `db_payments` (PostgreSQL) |
+| `payment-service` | 3002 | ~~exposta~~ | `db_payment` (PostgreSQL) |
+| `evidence-service` | 3003 | ~~exposta~~ | `db_evidence` (PostgreSQL) |
 | `notification-service` | — | — | — |
 | `rabbitmq` | 5672 / 15672 | **15672** | — |
 | `db_auth` | 5432 | — | — |
-| `db_payments` | 5433 | — | — |
+| `db_payment` | 5432 | — | — |
+| `db_evidence` | 5432 | — | — |
 
 ---
 
@@ -407,6 +420,7 @@ Sprint 1 → Fase 1.1 → Fase 1.2
 Sprint 2 → Fase 2.1 → Fase 2.2
 Sprint 3 → Fase 3.1 → Fase 3.2
 Sprint 4 → Fase 4.1 → Fase 4.2 → Fase 4.3
+Sprint 5 → REQ02 → REQ08/REQ09/REQ10 → REQ15
 ```
 
 > Cada fase é independente e deve ser executada com contexto limpo.  

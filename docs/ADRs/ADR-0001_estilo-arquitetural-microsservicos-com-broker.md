@@ -2,7 +2,7 @@
 
 ## Context and Problem Statement
 
-O Veridit precisa isolar operações de alto custo computacional (captura de mídia, geração de relatórios ZIP) das operações leves (login, consulta de saldo) para atender simultaneamente aos atributos de Elasticidade, Confiabilidade e Performance. A solução precisa ser viável de executar localmente com `docker-compose` para apresentação acadêmica, descartando opções que exijam cluster de nuvem ou infraestrutura cara.
+O Veridit precisa isolar operações de alto custo computacional (captura de mídia, geração de relatórios ZIP) das operações leves (login, consulta de saldo) para atender simultaneamente aos atributos de Elasticidade, Confiabilidade e Performance. A solução precisa ser viável de executar localmente com Docker Compose para apresentação acadêmica, descartando opções que exijam cluster de nuvem ou infraestrutura cara.
 
 ## Considered Options
 
@@ -12,7 +12,7 @@ O Veridit precisa isolar operações de alto custo computacional (captura de mí
 
 ## Decision Outcome
 
-Chosen option: "Microsserviços + Broker de Eventos", because atende ao direcionador eliminatório de Elasticidade (cada serviço pode escalar de forma independente) e Confiabilidade (falha em um serviço não derruba os demais). A separação física entre `auth-service` e `payment-service` já está implementada no repositório com Dockerfiles e bancos de dados individuais. O broker assíncrono viabiliza o processamento de mídia em background sem bloquear o usuário (Performance). Todo o ambiente sobe com `docker-compose up`, sem dependência de Kubernetes ou cloud.
+Chosen option: "Microsserviços + Broker de Eventos", because atende ao direcionador eliminatório de Elasticidade (cada serviço pode escalar de forma independente) e Confiabilidade (falha em um serviço não derruba os demais). A separação física entre `auth-service` e `payment-service` já está implementada no repositório com Dockerfiles e bancos de dados individuais. O broker assíncrono viabiliza o processamento de mídia em background sem bloquear o usuário (Performance). Todo o ambiente sobe com `docker compose up --build -d`, sem dependência de Kubernetes ou cloud.
 
 ### Consequences
 

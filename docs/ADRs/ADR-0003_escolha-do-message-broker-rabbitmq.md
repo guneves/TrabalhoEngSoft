@@ -12,7 +12,7 @@ A ADR-0001 exige um broker de eventos para comunicação assíncrona entre servi
 
 ## Decision Outcome
 
-Chosen option: "RabbitMQ", because é o único entre as três opções que sobe como container Docker único sem dependências externas (`image: rabbitmq:3-management`) e possui Dead-Letter Exchange (DLX) nativo, atendendo ao requisito de DLQ da ADR 001 do Grupo 2. Kafka exigiria ZooKeeper/KRaft e configuração de partições — inviável para `docker-compose` acadêmico sem overhead operacional. Redis Streams não possui semântica de DLQ suficiente para garantir reprocessamento de pagamentos falhos.
+Chosen option: "RabbitMQ", because é o único entre as três opções que sobe como container Docker único sem dependências externas (`image: rabbitmq:3-management`) e possui Dead-Letter Exchange (DLX) nativo, atendendo ao requisito de DLQ da ADR 001 do Grupo 2. Kafka exigiria ZooKeeper/KRaft e configuração de partições — inviável para Docker Compose acadêmico sem overhead operacional. Redis Streams não possui semântica de DLQ suficiente para garantir reprocessamento de pagamentos falhos.
 
 ### Consequences
 

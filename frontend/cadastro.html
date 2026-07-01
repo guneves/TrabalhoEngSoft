@@ -163,9 +163,8 @@
                     alert(data.error || 'Erro ao cadastrar.');
                 }
             } catch (err) { 
-                // Modo Simulado se o backend estiver fora do ar
-                alert('Modo demonstração: Cadastro simulado com sucesso!');
-                window.location.href = 'login.html';
+                console.error('[Cadastro] Auth service inacessível:', err);
+                alert('Serviço de autenticação indisponível. Tente novamente em instantes.');
             }
         }
     </script>

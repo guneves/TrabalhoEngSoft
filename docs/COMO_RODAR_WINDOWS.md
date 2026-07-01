@@ -13,19 +13,35 @@
 No PowerShell, dentro da pasta do projeto:
 
 ```powershell
-docker compose up --build
+docker compose up --build -d
 ```
 
-Se sua instalacao usa Docker Compose antigo:
+Confira se todos os containers subiram:
 
 ```powershell
-docker-compose up --build
+docker compose ps
 ```
 
-A API fica disponivel em:
+Todos devem aparecer como `Up`; o `rabbitmq` deve aparecer como `healthy`.
+
+A aplicacao fica disponivel no navegador em:
 
 ```text
 http://localhost
+```
+
+Se quiser abrir pelo PowerShell:
+
+```powershell
+start http://localhost
+```
+
+O painel do RabbitMQ fica em:
+
+```text
+http://localhost:15672
+usuario: guest
+senha: guest
 ```
 
 ## Teste rapido via PowerShell
@@ -87,3 +103,39 @@ Invoke-RestMethod -Method Post -Uri "$base/api/auth/password/reset" -ContentType
 ```
 
 Observacao: o token tambem aparece no log do container `auth-service`, simulando o envio por email.
+
+Teste pacotes, checkout, PIX e notificacao:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "$base/api/payments/packages"
+
+$checkout = @{
+  packageId = 1
+  billingData = @{
+    nome = "Usuario Teste"
+    cpf = "12345678901"
+    email = "teste@example.com"
+  }
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method Post -Uri "$base/api/payments/checkout" -Headers $headers -ContentType "application/json" -Body $checkout
+docker compose logs --tail=80 notification-service
+```
+
+O log deve mostrar uma linha no formato:
+
+```text
+[EMAIL] Enviando confirmação para teste@example.com — compra <id>
+```
+
+## Parar a aplicacao
+
+```powershell
+docker compose down
+```
+
+Para apagar tambem os bancos/volumes e recomecar limpo:
+
+```powershell
+docker compose down -v
+```

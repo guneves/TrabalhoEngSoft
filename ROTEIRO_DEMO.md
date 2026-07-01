@@ -11,7 +11,7 @@
 
 ```bash
 # Parar e remover TUDO: containers, volumes, redes e imagens buildadas
-docker-compose down -v --remove-orphans
+docker compose down -v --remove-orphans
 
 # Confirmar que não sobrou nada rodando
 docker ps -a
@@ -22,12 +22,13 @@ docker ps -a
 
 ```bash
 # Subir todos os serviços do zero
-docker-compose up --build
+docker compose up --build -d
 
 # Aguardar as seguintes mensagens nos logs (na ordem):
-# ✅ db_auth e db_payments aceitando conexões
-# ✅ auth-service: "Migration executada com sucesso" → "Auth Service ativo na porta 3001"
-# ✅ payment-service: "Migration executada com sucesso" → "Payment Service ativo na porta 3002"
+# ✅ db_auth, db_payment e db_evidence aceitando conexões
+# ✅ auth-service: "PostgreSQL pronto. Aplicando migration..." → "Auth Service ativo na porta 3001"
+# ✅ payment-service: "PostgreSQL pronto. Aplicando migration..." → "Payment Service ativo na porta 3002"
+# ✅ evidence-service: "PostgreSQL pronto. Aplicando migration..." → "Evidence Service ativo na porta 3003"
 # ✅ rabbitmq: "Server startup complete"
 # ✅ notification-service: "[Notification] Conectado ao RabbitMQ"
 # ✅ gateway: iniciado sem erros
@@ -56,7 +57,7 @@ curl -s -X POST http://localhost/api/auth/register \
 ### Passo 3 — Confirmar que todos os containers estão saudáveis
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 Esperado — todos com status `Up`:
@@ -69,14 +70,15 @@ payment-service         Up
 notification-service    Up
 rabbitmq                Up (ports 5672, 15672)
 db_auth                 Up
-db_payments             Up
+db_payment              Up
+db_evidence             Up
 ```
 
 ### Passo 4 — Deixar aberto antes de apresentar
 
 Deixar visível no computador:
 
-- **Terminal 1:** `docker-compose logs -f notification-service` rodando
+- **Terminal 1:** `docker compose logs -f notification-service` rodando
 - **Terminal 2:** pronto para digitar comandos
 - **Browser aba 1:** `http://localhost/login.html`
 - **Browser aba 2:** `http://localhost:15672` (painel RabbitMQ — login: `guest` / `guest`)
@@ -89,17 +91,17 @@ Deixar visível no computador:
 
 ### DEMO 1 — Sistema rodando (critério: o sistema deve estar rodando)
 
-**O que mostrar:** painel do Docker ou terminal com os 7 containers ativos.
+**O que mostrar:** painel do Docker ou terminal com os 9 containers ativos.
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 **:**
 
-> "O sistema sobe com um único comando — docker-compose up --build.
-> São 7 containers: gateway, auth-service, payment-service,
-> notification-service, RabbitMQ, db_auth e db_payments.
+> "O sistema sobe com um único comando — docker compose up --build -d.
+> São 9 containers: gateway, auth-service, payment-service, evidence-service,
+> notification-service, RabbitMQ, db_auth, db_payment e db_evidence.
 > Tudo acessível via http://localhost — porta 80."
 
 ---
@@ -204,7 +206,7 @@ CPF           : 123.456.789-00
 **Terminal com logs do notification-service:**
 
 ```bash
-docker-compose logs -f notification-service
+docker compose logs -f notification-service
 ```
 
 Após o checkout do passo anterior, a linha já deve ter aparecido:
@@ -233,7 +235,7 @@ Após o checkout do passo anterior, a linha já deve ter aparecido:
 
 ```bash
 # Derrubar o banco de pagamentos
-docker-compose stop db_payments
+docker compose stop db_payment
 ```
 
 Voltar ao browser, tentar fazer um novo checkout.
@@ -243,7 +245,7 @@ Voltar ao browser, tentar fazer um novo checkout.
 Mostrar os logs do payment-service:
 
 ```bash
-docker-compose logs -f payment-service
+docker compose logs -f payment-service
 ```
 
 Esperado nos logs:
@@ -255,7 +257,7 @@ Esperado nos logs:
 **Restaurar e aguardar:**
 
 ```bash
-docker-compose start db_payments
+docker compose start db_payment
 sleep 12
 ```
 
@@ -275,7 +277,82 @@ Tentar checkout novamente — deve funcionar. Logs:
 
 ---
 
-### DEMO 7 — Logout (REQ04)
+### DEMO 7 — Recuperação de Senha (REQ02)
+
+**O que fazer:**
+
+```bash
+curl -s -X POST http://localhost/api/auth/password/forgot \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "ana@veridit.com" }' | python3 -m json.tool
+```
+
+Copiar o `resetToken` retornado e executar:
+
+```bash
+curl -s -X POST http://localhost/api/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "<RESET_TOKEN>",
+    "novaSenha": "novaSenha2026"
+  }' | python3 -m json.tool
+```
+
+**Fala:**
+
+> "A recuperação de senha usa token temporário com hash SHA-256 no banco.
+> O envio de email está simulado no log do auth-service, suficiente para demonstrar
+> o fluxo sem depender de SMTP externo."
+
+---
+
+### DEMO 8 — Evidências e ZIP Final (REQ08, REQ09, REQ10, REQ15)
+
+**Pré-requisito:** usar um JWT válido do login.
+
+```bash
+TOKEN="<JWT_DO_LOGIN>"
+```
+
+Criar solicitação de prova:
+
+```bash
+curl -s -X POST http://localhost/api/evidence/requests \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "titulo": "Captura de conversa",
+    "descricao": "Solicitacao inicial para demonstracao",
+    "tipo": "web",
+    "url": "https://exemplo.com/conversa",
+    "metadata": { "origem": "demo" }
+  }' | python3 -m json.tool
+```
+
+Listar e detalhar:
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" http://localhost/api/evidence/requests | python3 -m json.tool
+curl -s -H "Authorization: Bearer $TOKEN" http://localhost/api/evidence/requests/1 | python3 -m json.tool
+```
+
+Baixar ZIP:
+
+```bash
+curl -L -H "Authorization: Bearer $TOKEN" \
+  http://localhost/api/evidence/requests/1/download \
+  -o prova-simulada.zip
+```
+
+**Fala:**
+
+> "O evidence-service cria, lista e detalha solicitações de prova por usuário.
+> O download gera um ZIP simulado contendo JSON da solicitação e relatório textual,
+> o que cobre o requisito de arquivo final sem implementar captura real de mídia."
+
+---
+
+### DEMO 9 — Logout (REQ04)
 
 **Onde:** `http://localhost/creditos.html`
 
@@ -293,7 +370,7 @@ Tentar checkout novamente — deve funcionar. Logs:
 
 ---
 
-### DEMO 8 — Repositório (critério: README + GitHub)
+### DEMO 10 — Repositório (critério: README + GitHub)
 
 **Onde:** abrir o repositório no GitHub
 
@@ -316,10 +393,10 @@ Mostrar:
 
 | Problema             | Solução                                                           |
 | -------------------- | ----------------------------------------------------------------- |
-| Container não sobe   | `docker-compose down -v && docker-compose up --build`             |
-| Migration falha      | `docker-compose restart auth-service` ou `payment-service`        |
+| Container não sobe   | `docker compose down -v && docker compose up --build -d`          |
+| Migration falha      | `docker compose restart auth-service` ou `payment-service`        |
 | Login retorna 401    | Recriar usuário: executar o curl do Passo 2 novamente             |
-| RabbitMQ não conecta | `docker-compose restart notification-service`                     |
+| RabbitMQ não conecta | `docker compose restart notification-service`                     |
 | Porta 80 em uso      | `sudo lsof -i :80` → encerrar o processo que ocupa a porta        |
 | pixCode não aparece  | Verificar se o token está no localStorage — fazer login novamente |
 
@@ -328,12 +405,15 @@ Mostrar:
 ## CHECKLIST FINAL (conferir 5 minutos antes)
 
 ```
-[ ] docker-compose ps → 7 containers Up
+[ ] docker compose ps → 9 containers Up
 [ ] http://localhost/login.html → página carrega
 [ ] http://localhost:15672 → painel RabbitMQ abre (guest/guest)
 [ ] Login com ana@veridit.com / veridit2026 → token no localStorage
 [ ] GET http://localhost/api/payments/packages → 3 pacotes retornados
-[ ] Terminal com docker-compose logs -f notification-service aberto
+[ ] POST http://localhost/api/auth/password/forgot → token temporário retornado
+[ ] POST http://localhost/api/evidence/requests → solicitação de prova criada
+[ ] GET http://localhost/api/evidence/requests/1/download → ZIP baixado
+[ ] Terminal com docker compose logs -f notification-service aberto
 [ ] Repositório GitHub aberto no browser
 [ ] jwt.io aberto no browser para decodificar o token ao vivo
 ```
